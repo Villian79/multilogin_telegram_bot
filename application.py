@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import os
 import sys
-import requests
 import logging
+import telebot
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -16,42 +16,23 @@ log_datefmt='%m-%d-%Y %H:%M:%S'
 logging.basicConfig(filename=log_filename, filemode=log_filemode, level=log_level, format=log_format, datefmt=log_datefmt)
 logger = logging.getLogger('telegram_logs')
 
-# Getting mode, so we could define run function for local and Heroku setup
-mode = os.getenv("MODE")
+#Starting the Bot
 TOKEN = os.getenv("TOKEN")
-MAIN_URL = f"https://api.telegram.org/bot{ TOKEN }"
+bot = telebot.TeleBot(TOKEN)
 
-if mode == "dev":
-    # Receive updates from the chat with the bot
-    # r = requests.get(f"{ MAIN_URL }/getUpdates")
-    # if r.status_code != 200:
-    #     logger.error("Not connected to bot")
-    #     sys.exit(1)
-    # logger.info("Connection with bot established")
-    # print(r.json())
 
-    #Bot sending response
-    payload = {
-        "chat_id": 710231208,
-        "text": "Howdy buddy"
-    }
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.send_message(message.chat.id, "Howdy!!! How are you doing?", disable_notification=True)
 
-    r = requests.post(f"{ MAIN_URL }/sendMessage", data = payload)
-    print(r.json())
+@bot.message_handler(func=lambda m: True)
+def echo_all(message):
+    print(message)
+	#bot.send_message(message.chat.id, message.text)
 
-    # def run(updater):
-    #     updater.start_polling()
-###-----------------------Connecting to Heroku server---------------------####
-# elif mode == "prod":
-#     def run(updater):
-#         PORT = int(os.environ.get("PORT", "8443"))
-#         HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
-#         # Code from https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks#heroku
-#         updater.start_webhook(listen="0.0.0.0",
-#                               port=PORT,
-#                               url_path=TOKEN)
-#         updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(HEROKU_APP_NAME, TOKEN))
+@bot.message_handler(content_types=['sticker'])
+def echo_any(message):
+    print(message.sticker)
 
-else:
-    logger.error("No MODE specified! Check enviroment vars")
-    sys.exit(1)
+
+bot.polling(timeout=60)
