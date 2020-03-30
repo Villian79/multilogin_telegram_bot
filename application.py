@@ -5,16 +5,6 @@ import telebot
 from dotenv import load_dotenv
 load_dotenv()
 
-#Enabling logging
-# log_filename = 'logs_multilogin.log'
-# log_filemode = 'w'
-# log_level = logging.DEBUG
-# log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-# log_datefmt='%m-%d-%Y %H:%M:%S'
-
-# logging.basicConfig(filename=log_filename, filemode=log_filemode, level=log_level, format=log_format, datefmt=log_datefmt)
-# logger = logging.getLogger('telegram_logs')
-
 #Starting the Bot
 TOKEN = os.getenv("TOKEN")
 bot = telebot.TeleBot(TOKEN)
@@ -23,7 +13,7 @@ bot = telebot.TeleBot(TOKEN)
 def main_help_markup():
     help_markup = telebot.types.InlineKeyboardMarkup()
     help_markup.row(
-        telebot.types.InlineKeyboardButton('Мультилогин - что это?', callback_data='get-about'), 
+        telebot.types.InlineKeyboardButton('О нас', callback_data='get-about'), 
         telebot.types.InlineKeyboardButton('Документация', callback_data='get-docs')
     )
     help_markup.row(
@@ -31,7 +21,7 @@ def main_help_markup():
         telebot.types.InlineKeyboardButton('Прокси рекомендации', url='https://multilogin.com/ru/proxy/')
     )
     help_markup.row(
-        telebot.types.InlineKeyboardButton('ЧаВо', callback_data='get-price'), 
+        telebot.types.InlineKeyboardButton('ЧаВо', callback_data='get-faq'), 
         telebot.types.InlineKeyboardButton('Свяжитесь с нами', callback_data='get-contact')
     )
     return help_markup
@@ -80,6 +70,10 @@ def test_callback(query):
         get_about_callback(query)
     elif data == 'get-docs':
         get_docs_callback(query)
+    elif data == 'get-price':
+        get_price_callback(query)
+    elif data == 'get-contact':
+        get_contact_callback(query)
     else:
         print('Undefined callback')
 
@@ -117,11 +111,58 @@ def get_docs_callback(query):
         reply_markup=docs_markup
     )
 
+def get_price_callback(query):
+    price_markup = telebot.types.InlineKeyboardMarkup()
+    price_markup.add(telebot.types.InlineKeyboardButton('Оформить подписку', url='https://multilogin.com/ru/pricing-purchase/'))
+
+    bot.send_message(
+        query.message.chat.id,
+        "<strong>Мы предлагаем следующие тарифные пакеты:</strong>\n\n"
+        + "<strong>Работа в команде:</strong>\n\n"
+        + "🕺 SOLO - 99 EUR/мес\n"
+        + "<i>- создавайте до 100 профилей</i>\n\n"
+        + "👫 TEAM - 199 EUR/мес\n"
+        + "<i>- создавайте до 300 профилей</i>\n"
+        + "<i>- приглашайте до 3 участников</i>\n\n"
+        + "👨‍👩‍👧‍👦 SCALE - 399 EUR/мес\n"
+        + "<i>- создавайте до 1000 профилей</i>\n"
+        + "<i>- приглашайте до 7 участников</i>\n"
+        + "<i>- доступ к REST API, CLI</i>\n\n\n"
+        + "<strong>Автоматизация:</strong>\n\n"
+        + "🎓 Automate S - 200 EUR/мес\n"
+        + "<i>- Интеграция с HTTP и SOCKS</i>\n"
+        + "<i>- CLI, REST, и Local API</i>\n"
+        + "<i>- Интеграция Selenium</i>\n"
+        + "<i>- 1000 свежих браузерных отпечатков в день</i>\n"
+        + "<i>- Техническая поддержка</i>\n\n"
+        + "👑 Automate A - 600 EUR/мес\n"
+        + "<i>- Интеграция с HTTP и SOCKS</i>\n"
+        + "<i>- CLI, REST, и Local API</i>\n"
+        + "<i>- Интеграция Selenium</i>\n"
+        + "<i>- 20'000 свежих браузерных отпечатков в день</i>\n"
+        + "<i>- 45000 проверок повышенной точности Ip2Geo</i>\n\n",
+        parse_mode="HTML",
+        reply_markup=price_markup
+    )
+
+def get_contact_callback(query):
+    contact_markup = telebot.types.InlineKeyboardMarkup()
+    contact_markup.row(
+        telebot.types.InlineKeyboardButton('EMAIL', url='https://multilogin.com/ru/contact-us/'),
+        telebot.types.InlineKeyboardButton('Он-лайн ЧАТ', url='https://multilogin.com/ru/')
+    )
+    bot.send_photo(
+        query.message.chat.id,
+        photo='AgACAgIAAxkBAAICgV6CRt5A0_emN4aaT-KK9c50mrl7AAL5rjEb-hEYSKVJwAdbq5PZL8rCDwAEAQADAgADeAADS1gFAAEYBA',
+        reply_markup=contact_markup    
+    )
+
+
 @bot.message_handler(commands=['hide'])
 def command_hide(message):
     hide_markup = telebot.types.ReplyKeyboardRemove()
     bot.send_message(message.chat.id, "⌨💤...", reply_markup=hide_markup)
-
+    
   
 @bot.message_handler(func=lambda m: True)
 def echo_all(message):
