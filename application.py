@@ -166,12 +166,21 @@ def command_hide(message):
   
 @bot.message_handler(func=lambda m: True)
 def echo_all(message):
-    print(message)
-    # bot.send_message(message.chat.id, message.text)
-
-@bot.message_handler(content_types=['sticker'])
-def echo_any(message):
-    print(message.sticker)  
+    contact_markup = telebot.types.InlineKeyboardMarkup()
+    contact_markup.row(
+        telebot.types.InlineKeyboardButton('EMAIL', url='https://multilogin.com/ru/contact-us/'),
+        telebot.types.InlineKeyboardButton('Он-лайн ЧАТ', url='https://multilogin.com/ru/')
+    )
+    bot.send_message(
+        message.chat.id, 
+        "Хочешь пообщаться вживую? Нажимай ниже\n"
+        + "              👇👇👇"
+    )
+    bot.send_photo(
+        message.chat.id,
+        photo='AgACAgIAAxkBAAICgV6CRt5A0_emN4aaT-KK9c50mrl7AAL5rjEb-hEYSKVJwAdbq5PZL8rCDwAEAQADAgADeAADS1gFAAEYBA',
+        reply_markup=contact_markup    
+    )
 
 
 while True:
